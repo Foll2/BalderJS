@@ -1,0 +1,27 @@
+{
+    "name": "balderjs",
+    "version": "11.2.1",
+    "description": "",
+    "homepage": "https://github.com/Foll2/BalderJS#readme",
+    "bugs": {
+        "url": "https://github.com/Foll2/BalderJS/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Foll2/BalderJS.git"
+    },
+    "license": "ISC",
+    "author": "",
+    "bin": {
+        "balderjs": "bin/cli.js"
+    },
+    "scripts": {
+        "dev": "balderjs",
+        "start": "balderjs"
+    },
+    "dependencies": {
+        "browser-sync": "^3.0.4",
+        "chokidar": "^4.0.3",
+        "esbuild": "^0.25.5"
+    }
+}
