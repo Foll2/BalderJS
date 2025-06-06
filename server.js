@@ -8,11 +8,11 @@ const chokidar = require("chokidar");
 const browserSync = require("browser-sync").create();
 
 const projectRoot = process.cwd();
-const entryDir = isDev ? "default" : "";
+const entryDir = isDev ? "src" : "";
 const outDir = path.join(projectRoot, ".dev");
 
 if (!fs.existsSync(path.join(projectRoot, "balder.ts")) && !isDev) {
-    fs.cpSync(path.join(__dirname, "default"), projectRoot, { recursive: true });
+    fs.cpSync(path.join(__dirname, "src"), projectRoot, { recursive: true });
     fs.mkdirSync(path.join(projectRoot, "apps"));
     console.log("Initial setup complete")
 }
@@ -31,7 +31,7 @@ async function buildOnce() {
             bundle: true,
             sourcemap: true,
             format: "esm",
-            external: ["./balder.ts", "./default/balder.ts"],
+            external: ["./balder.ts", "./src/balder.ts"],
         });
 
         await esbuild.build({
