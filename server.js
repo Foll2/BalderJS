@@ -56,9 +56,10 @@ buildOnce().then(() => {
 
 
 chokidar
-    .watch(path.join(projectRoot, entryDir), { ignoreInitial: true })
+    .watch(path.join(projectRoot, entryDir), { ignoreInitial: true, ignored: (path) => path.includes('.dev')})
     .on("all", (event, pathChanged) => {
-        console.log(`File ${pathChanged} changed (${event}). Rebuilding…`);
+        // if (/^(?:\.\/)?\.dev(?:[\\/]|$)/.test(path.relative(projectRoot, pathChanged))) return;
+        console.log(`File ${pathChanged} (${event}). Rebuilding…`);
         buildOnce();
     });
 
