@@ -1,7 +1,7 @@
 node_modules
 .vscode
 .dev
-*.ts
-tsconfig.json
-assets
-apps
+/*.ts
+/tsconfig.json
+/assets
+/apps
