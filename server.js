@@ -12,8 +12,14 @@ const entryDir = isDev ? "src" : "";
 const outDir = path.join(projectRoot, ".dev");
 
 if (!fs.existsSync(path.join(projectRoot, "balder.ts")) && !isDev) {
-    fs.cpSync(path.join(__dirname, "src"), projectRoot, { recursive: true });
-    fs.mkdirSync(path.join(projectRoot, "apps"));
+    if (fs.readdirSync(projectRoot).some(file => file.endsWith(".ts"))) {
+        fs.cpSync(path.join(__dirname, "src", "balder.ts"), path.join(projectRoot, "balder.ts"));
+    } else {
+        fs.cpSync(path.join(__dirname, "src"), projectRoot, { recursive: true,  });
+    }
+    if (!fs.existsSync(path.join(projectRoot, "apps"))) {
+        fs.mkdirSync(path.join(projectRoot, "apps"));
+    }
     console.log("Initial setup complete")
 }
 
@@ -45,7 +51,7 @@ async function buildOnce() {
         console.log("Built → bundle.js + balder.js");
         browserSync.reload();
     } catch (err) {
-        console.error("Build failed:", err);
+        console.error(err);
     }
 }
 
