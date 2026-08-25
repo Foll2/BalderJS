@@ -1,18 +1,21 @@
-/* 14.0 */
+/* 15.0 2026-08-17 */
 
 html {
     height: 100%;
     display: flex;
-    color-scheme: light dark;
 }
 
 body {
     flex: 1;
     display: flex;
     flex-flow: column;
+
+    color-scheme: light dark;
+    background-color: light-dark(#ffffff, #121212);
+    color: light-dark(#121212, #ffffff);
 }
 
-#_canvas {
+#canvasContainer {
     flex: 1;
     position: relative;
     outline: none;
@@ -26,57 +29,109 @@ body {
         height: 100%;
         min-height: 150px;
     }
+
+    button,
+    input {
+        position: absolute;
+        background-color: transparent;
+        font: 16px consolas, monospace;
+    }
+
 }
 
-#_io,
-#_console {
+#ioContainer {
+    max-height: 100%;
+    overflow-y: auto;
+
     font-family: consolas, monospace;
     line-break: anywhere;
     white-space: pre-wrap;
 }
 
+.correct {
+    color: black;
+    background-color: palegreen;
+}
 
-#_io {
-    b {
-        line-break: anywhere;
-        outline: none;
+.incorrect {
+    color: black;
+    background-color: lightsalmon;
+}
+
+.error {
+    color: red;
+}
+
+#_setInput,
+#_setOutput {
+    button {
+        align-items: center;
     }
 
-    p { 
-        color: black;
-
-        .correct {
-            background-color: palegreen;
-        }
-
-        .incorrect {
-            background-color: lightsalmon;
-        }
+    textarea {
+        flex: 1;
+        min-height: min-content;
     }
 }
 
-#_console {
+.setter {
+    display: flex;
+    gap: 5px;
+
+    label {
+        flex: 1;
+        display: flex;
+
+        textarea {
+            flex: 1;
+            min-height: min-content;
+            resize: vertical;
+        }
+    }
+
+    button {
+        margin: 1em 0;
+    }
+}
+
+#logContainer {
+    color-scheme: light dark;
+    color: light-dark(black, white);
+    background-color: light-dark(white, black);
+
+    max-height: 100%;
+    overflow-y: auto;
+
+    font-family: consolas, monospace;
+    line-break: anywhere;
+    white-space: pre-wrap;
     position: fixed;
-    bottom: 4px;
+    padding: 0 1em;
     left: 0;
     box-sizing: border-box;
     width: 100%;
-    border: 1px solid;
     z-index: 1;
     background-color: Canvas;
 
-    max-height: 50%;
-    overflow-y: auto;
-
-    .error {
-        color: red;
+    &::after {
+        position: absolute;
+        top: -4px;
+        right: 2px;
+        content: "🗙";
     }
 
-    span {
-        color: GrayText;
+    bottom: 0;
+    border-top: 1px solid;
+
+    &.top {
+        top: 0;
+        bottom: unset;
+        border-bottom: 1px solid;
+        border-top: unset;
     }
 
+    &.no,
     &:empty {
         display: none;
-    }    
+    }
 }

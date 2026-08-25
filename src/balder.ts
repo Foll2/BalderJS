@@ -1,22 +1,35 @@
 /**
-* BalderJS
-* version 14.0 (2025-08-13)
-* Mattias Steinwall
-* Baldergymnasiet, Skellefteå, Sweden
+ * BalderJS
+ * version 15.0 (2026-08-17)
+ * Mattias Steinwall
+ * Baldergymnasiet, Skellefteå, Sweden
 */
 
 
-const _canvas = document.createElement("div");
-_canvas.id = "_canvas";
+/**
+ * BalderJS
+ * 
+ */
+const canvasContainer = document.createElement("div");
+canvasContainer.id = "canvasContainer";
+canvasContainer.tabIndex = 0;
 
-const _io = document.createElement("div");
-_io.id = "_io";
-_io.hidden = true;
+/**
+ * BalderJS
+ * 
+ */
+const ioContainer = document.createElement("div");
+ioContainer.id = "ioContainer";
+ioContainer.hidden = true;
 
-const _console = document.createElement("div");
-_console.id = "_console";
+/**
+ * BalderJS
+ * 
+ */
+const logContainer = document.createElement("div")
+logContainer.id = "logContainer";
 
-document.body.append(_canvas, _io, _console);
+document.body.append(canvasContainer, ioContainer, logContainer);
 
 const _canvasLayers: Record<number, HTMLCanvasElement> = {};
 const _ctxs: Record<number, CanvasRenderingContext2D> = {};
@@ -26,58 +39,85 @@ let _layer: number;
  * BalderJS
  * 
  * The rendering context for the current canvas layer. 
- * For customized graphics.
+ * Used for customized graphics.
  * @example
- * Draw a tilted filled yellow half-ellipse:
- * ```
+ * // Draw a tilted filled yellow half-ellipse
  * ctx.ellipse(100, 100, 100, 50, radians(45), 0, radians(180))
  * ctx.fillStyle = "yellow"
  * ctx.fill()
- * ```
  */
 let ctx: CanvasRenderingContext2D;
 
 /**
  * BalderJS
  * 
- * Returns the width, in pixels, of the canvas. See also `H`.
+ * The width, in pixels, of the canvas. See also `H`.
  * @example 
- * Draw a circle in the middle of the canvas:
- * ```
- * circle(W / 2, H / 2, 100)
- * ```
- * @example 
- * Draw a line from the top left corner to the bottom right corner of the canvas.
- * ```
- * line(0, 0, W, H)
- * ```
- */
-const W = parseInt(getComputedStyle(_canvas).width);
+ * //Draw a circle in the middle, and a line across the canvas.
+ * drawCircle(W / 2, H / 2, 100)
+ * drawLine(0, 0, W, H)
+*/
+const W = parseInt(getComputedStyle(canvasContainer).width);
 
 /**
  * BalderJS
  * 
- * Returns the height, in pixels, of the canvas. See also `W`.
+ * The height, in pixels, of the canvas. See also `W`.
  * @example 
- * Draw a circle in the middle of the canvas:
- * ```
- * circle(W / 2, H / 2, 100)
- * ```
- * @example 
- * Draw a line from the top left corner to the bottom right corner of the canvas.
- * ```
- * line(0, 0, W, H)
- * ```
+ * // Draw a circle in the middle, and a line across the canvas.
+ * drawCircle(W / 2, H / 2, 100)
+ * drawLine(0, 0, W, H)
 */
-const H = parseInt(getComputedStyle(_canvas).height);
+const H = parseInt(getComputedStyle(canvasContainer).height);
+
+addEventListener("resize", () => {
+    if (!canvasContainer.hidden) location.reload()
+});
 
 /**
  * BalderJS
  *
- * Draws an ellipse on the canvas with center in (`x`, `y`).
+ * Draws a circle with center in (`x`, `y`).
+ * 
+ * 
+ * @example 
+ * // A filled circle with default color (black)
+ * drawCircle(100, 50, 50)
+ * 
+ * // A filled red circle:
+ * drawCircle(200, 50, 50, "red")
+ * 
+ * // A blue circle with a line width of 5 pixels:
+ * drawCircle(300, 50, 50, "blue", 5)
  */
-function ellipse(
-    x: number, y: number,
+function drawCircle(
+    x: number,
+    y: number,
+    radius: number,
+    color?: string,
+    lineWidth?: number
+) {
+    drawEllipse(x, y, radius, radius, color, lineWidth);
+}
+
+/**
+ * BalderJS
+ *
+ * Draws an ellipse with center in (`x`, `y`).
+ * 
+ * @example 
+ * // A filled ellipse with default color (black)
+ * drawEllipse(100, 50, 50, 30)
+ * 
+ * // A filled red ellipse
+ * drawEllipse(200, 50, 50, 30,  "red")
+ * 
+ * // A ellipse with a line width of 5 pixels
+ * drawEllipse(300, 50, 50, 30, "blue", 5)
+ */
+function drawEllipse(
+    x: number,
+    y: number,
     radiusX: number,
     radiusY: number,
     color: string = "black",
@@ -98,47 +138,179 @@ function ellipse(
 
 /**
  * BalderJS
- *
- * Draws a circle on the canvas with center in (`x`, `y`).
- * @example 
- * Draw a filled circle with default color:
- * ```
- * circle(100, 50, 50)
- * ```
- * @example 
- * Draw a filled red circle:
- * ```
- * circle(100, 50, 50, "red")
- * ```
- * @example 
- * Draw a blue circle with a line width of 5 pixels:
- * ```
- * circle(100, 50, 50, "blue", 5)
- * ```
+ * 
+ * @example
+ * const image = await fetchImage("./path/to/image.jpg")
+ * drawImage(image, 100, 100)
  */
-function circle(
+function drawImage(image: HTMLImageElement, x = 0, y = 0, width?: number, height?: number) {    // 14.1
+    if (width && height) {
+        ctx.drawImage(image, x, y, width, height)
+    } else {
+        ctx.drawImage(image, x, y)
+    }
+}
+
+/**
+ * BalderJS
+ * 
+ * Draws a line on the canvas between (`x1`, `y1`) and (`x2`, `y2`).
+ * 
+ * @example 
+ * // Draw two thick blue lines across the canvas
+ * drawLine(0, 0, W, H, "blue", 20)
+ * drawLine(0, H, W, 0, "blue", 20)
+ */
+function drawLine(
+    x1: number, y1: number,
+    x2: number, y2: number,
+    color = "black",
+    lineWidth = 1
+) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+}
+
+/**
+ * BalderJS
+ * 
+ * Draws a rectangle on the canvas with upper left corner in (`x`, `y`).
+ * 
+ */
+function drawRectangle(
     x: number, y: number,
-    radius: number,
+    width: number, height: number,
+    color = "black",
+    lineWidth?: number
+) {
+    if (lineWidth !== undefined) {
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = color;
+        ctx.strokeRect(x, y, width, height);
+    } else {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, width, height);
+    }
+}
+
+/**
+ * BalderJS
+ * 
+ * Draws a square on the canvas with upper left corner in (`x`, `y`).
+ * 
+ */
+function drawSquare(
+    x: number, y: number,
+    side: number,
     color?: string,
     lineWidth?: number
 ) {
-    ellipse(x, y, radius, radius, color, lineWidth);
+    drawRectangle(x, y, side, side, color, lineWidth)
+}
+
+/**
+ * BalderJS
+ * 
+ * Draws `value` on the canvas. The baseline is set by `y`. 
+ * 
+ * @example
+ * // Draw text with the lower left corner in (`100`, `50`)
+ * drawText("abcd", 100, 50, 36, "red")
+ * 
+ * //Draw text right-aligned
+ * drawText("abcd", [W, "right"])
+ *
+ * // Draw text center-aligned
+ * drawText("abcd", [W / 2, "center"])
+ */
+function drawText(
+    value: string,
+    x: number | [number, "left" | "center" | "right"] = 0,
+    y: number | [number, "top" | "center" | "bottom"] = 16,
+    fontSize = 16,
+    color = "black"
+) {
+    ctx.font = fontSize + "px consolas,monospace"
+
+    if (typeof x != "number") {
+        const w = ctx.measureText(value).width;
+
+        switch (x[1]) {
+            case "left": x = x[0]; break;
+            case "center": x = x[0] - w / 2; break;
+            case "right": x = x[0] - w; break;
+        }
+    }
+
+    if (typeof y != "number") {
+        const h = ctx.measureText(value).actualBoundingBoxAscent;
+
+        switch (y[1]) {
+            case "top": y = y[0] + h; break;
+            case "center": y = y[0] + h / 2; break;
+            case "bottom": y = y[0]; break;
+        }
+    }
+
+    ctx.fillStyle = color;
+    ctx.fillText(value, x, y);
+}
+
+
+/**
+ * BalderJS
+ * 
+ * Draws a triangle on the canvas with corners in (`x1`, `y1`), (`x2`, `y2`) and (`x3`, `y3`).
+ * 
+ * @example 
+ * // Draw a triangle with default color (black)
+ * drawTriangle(100, 50, 200, 50, 200, 150)
+ * 
+ * //Draw a red triangle:
+ * drawTriangle(100, 150, 200, 150, 200, 250, "red")
+ * 
+ * //Draw a blue triangle with linewidth 2:
+ * drawTriangle(100, 250, 200, 250, 200, 350, "blue", 2)
+ */
+function drawTriangle(
+    x1: number, y1: number,
+    x2: number, y2: number,
+    x3: number, y3: number,
+    color = "black",
+    lineWidth?: number
+) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.closePath();
+
+    if (lineWidth !== undefined) {
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    } else {
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
 }
 
 /**
  * BalderJS
  * 
  * Clears the canvas.
+ * 
  * @example 
- * Clear the canvas:
- * ```
- * clear()
- * ```
- * @example 
- * Clear a rectangular part of the canvas with upper left corner in (`100`, `50`):
- * ```
- * clear(100, 50, 400, 300)
- * ```
+ * update = () => {
+ *     clear()
+ * 
+ *     // Draw a circle at a random postiton
+ *     drawCircle(randomNumber(10, W - 10), randomNumber(10, H - 10), 10)
+ * }
  */
 function clear(x = 0, y = 0, width = W, height = H) {
     ctx.clearRect(x, y, width, height);
@@ -149,25 +321,22 @@ function clear(x = 0, y = 0, width = W, height = H) {
  * 
  * Fills the canvas with given color.
  * @example 
- * ```
  * fill("blue")
- * ``` 
 */
 function fill(color = "black") {
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, W, H);
 }
 
+
 /**
  * BalderJS
  * 
- * Gets color information, as a 4-tuple, for a given pixel.
+ * Returns color information, as a 4-tuple, for a given pixel.
  * Values `r`(ed), `g`(reen), `b`(lue) and `a`(lpha) are all in the interval 0 to 255.
  * @example 
- * ```
- * circle(50, 100, 30, randomItem("red", "green", "blue"))
- * text(getPixel(50, 100))
- * ``` 
+ * drawCircle(50, 100, 30, randomItem("red", "green", "blue"))
+ * output("[r, g, b, a]:", getPixel(50, 100))
 */
 function getPixel(x: number, y: number) {
     return Array.from(ctx.getImageData(x, y, 1, 1).data) as [r: number, g: number, b: number, a: number];
@@ -199,113 +368,11 @@ async function fetchImage(path: string) {
 /**
  * BalderJS
  * 
- */
-function imageFromDataURL(dataURL: string) {
-    const image = new Image();
-    image.src = dataURL;
-
-    return image;
-}
-
-/**
- * BalderJS
- * 
- * Draws a polygon on the canvas with edges in the `points`-array.
- * @example 
- * Draw a red diamond shape:
- * ```
- * polygon([[100, 100], [140, 160], [100, 220], [60, 160]], "red")
- * ```
- */
-function polygon(
-    points: [x: number, y: number][],
-    color = "black",
-    lineWidth?: number
-) {
-    ctx.beginPath();
-    ctx.moveTo(...points[0]);
-    for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(...points[i])
-    }
-    ctx.closePath();
-
-    if (lineWidth !== undefined) {
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = color;
-        ctx.stroke();
-    } else {
-        ctx.fillStyle = color;
-        ctx.fill();
-    }
-}
-
-/**
- * BalderJS
- * 
- * Draws a line on the canvas between (`x1`, `y1`) and (`x2`, `y2`).
- * @example 
- * Draw two thick blue lines across the canvas:
- * ```
- * line(0, 0, W, H, "blue", 20)
- * line(0, H, W, 0, "blue", 20)
- * ```
- */
-function line(
-    x1: number, y1: number,
-    x2: number, y2: number,
-    color = "black",
-    lineWidth = 1
-) {
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = lineWidth;
-    ctx.stroke();
-}
-
-/**
- * BalderJS
- * 
- * Draws a rectangle on the canvas with upper left corner in (`x`, `y`).
- */
-function rectangle(
-    x: number, y: number,
-    width: number, height: number,
-    color = "black",
-    lineWidth?: number
-) {
-    if (lineWidth !== undefined) {
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = color;
-        ctx.strokeRect(x, y, width, height);
-    } else {
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, width, height);
-    }
-}
-
-/**
- * BalderJS
- * 
- * Draws a square on the canvas with upper left corner in (`x`, `y`).
- */
-function square(
-    x: number, y: number,
-    side: number,
-    color?: string,
-    lineWidth?: number
-) {
-    rectangle(x, y, side, side, color, lineWidth)
-}
-
-/**
- * BalderJS
- * 
+ * Converts `value` to a string.
  */
 function str(value: unknown): string {
     if (Array.isArray(value)) {
-        return "[" + value.map(item => str(item)).join(",") + "]"
+        return "[" + value.map(str).join(",") + "]"
     } else if (typeof value == "object" &&
         ((value != null && Object.getPrototypeOf(value) === Object.prototype && value.toString == Object.prototype.toString))) {
         return JSON.stringify(value);
@@ -314,102 +381,6 @@ function str(value: unknown): string {
     }
 }
 
-/**
- * BalderJS
- * 
- * Draws `value` as a string on the canvas. The baseline is set by `y`. 
- * @example
- * Draw 'Hello world!' with the lower left corner in (`100`, `50`):
- * ```
- * text("Hello world!", 100, 50, 36, "red")
- * ```
- * @example
- * Draw 'abcd' right-aligned to the right:
- * ```
- * text("abcd", [W, "right"])
- * ```
- * @example
- * Draw 'abcd' center-aligned to the middle:
- * ```
- * text("abcd", [W / 2, "center"])
- * ```
- */
-function text(
-    value: unknown,
-    x: number | [number, "left" | "center" | "right"] = 0,
-    y: number | [number, "top" | "center" | "bottom"] = 16,
-    fontSize = 16,
-    color = "black"
-) {
-    ctx.font = fontSize + "px consolas,monospace"
-    const _text = str(value);
-
-    if (typeof x != "number") {
-        const w = ctx.measureText(_text).width;
-
-        switch (x[1]) {
-            case "left": x = x[0]; break;
-            case "center": x = x[0] - w / 2; break;
-            case "right": x = x[0] - w; break;
-        }
-    }
-
-    if (typeof y != "number") {
-        const h = ctx.measureText(_text).actualBoundingBoxAscent;
-
-        switch (y[1]) {
-            case "top": y = y[0] + h; break;
-            case "center": y = y[0] + h / 2; break;
-            case "bottom": y = y[0]; break;
-        }
-    }
-
-    ctx.fillStyle = color;
-    ctx.fillText(_text, x, y);
-}
-
-/**
- * BalderJS
- * 
- * Draws a triangle on the canvas with corners in (`x1`, `y1`), (`x2`, `y2`) and (`x3`, `y3`).
- * @example 
- * Draw a triangle with corners in (`100`, `50`), (`200`, `50`) and (`200`, `150`).
- * ```
- * triangle(100, 50, 200, 50, 200, 150)
- * ```
- * @example 
- * Draw a red triangle:
- * ```
- * triangle(100, 150, 200, 150, 200, 250, "red")
- * ```
- * @example 
- * Draw a blue triangle with linewidth 2:
- * ```
- * triangle(100, 250, 200, 250, 200, 350, "blue", 2)
- * ```
- */
-function triangle(
-    x1: number, y1: number,
-    x2: number, y2: number,
-    x3: number, y3: number,
-    color = "black",
-    lineWidth?: number
-) {
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.lineTo(x3, y3);
-    ctx.closePath();
-
-    if (lineWidth !== undefined) {
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = color;
-        ctx.stroke();
-    } else {
-        ctx.fillStyle = color;
-        ctx.fill();
-    }
-}
 
 /**
  * BalderJS
@@ -417,22 +388,17 @@ function triangle(
  * An object for keyboard input.
  * 
  * @example
- * ```
  * update = () => {
  *     clear()
+ * 
  *     if (keyboard.w) {
- *         text("key W")
+ *         drawText("key W")
+ *     }
+ *
+ *     if (keyboard.keys["Digit1"]) {
+ *         drawText("key 1")
  *     }
  * }
- * ``` 
- * @example
- * ```
- * update = () => {
- *     if (keyboard.keys["KeyR"]) {
- *         fill("red")
- *     }
- * }
- * ``` 
  */
 const keyboard = {
     /**
@@ -440,28 +406,30 @@ const keyboard = {
      * @example
      * update = () => {
      *     clear()
+     * 
      *     if (keyboard.pressed) {
-     *         text("Any key pressed!")
+     *         drawText("Any key pressed!")
      *     }
      * }
     */
     get pressed() { return Object.keys(_keys).some(value => _keys[value] === true) },
+
     /**
-     * Returns the latest key pressed. Not affected by the  keyboard layout.
+     * Returns the latest key pressed. Not affected by keyboard layout.
       * @example
       * update = () => {
       *     clear()
-      *     text(keyboard.keyName)
+      *     drawText(keyboard.keyName)
       * }
       */
     get keyName() { return _keyName },
+
     /**
      * Returns the state of all keys.
      */
     get keys() { return _keys },
 
     get space(): boolean { return !!_keys["Space"]; }, set space(value: false) { _keys["Space"] = value; },
-    get tab(): boolean { return !!_keys["Tab"]; }, set tab(value: false) { _keys["Tab"] = value; },
     get enter(): boolean { return !!_keys["Enter"]; }, set enter(value: false) { _keys["Enter"] = value; },
     get escape(): boolean { return !!_keys["Escape"]; }, set escape(value: false) { _keys["Escape"] = value; },
 
@@ -501,16 +469,14 @@ const keyboard = {
 let _keyName: string;
 let _keys: Record<string, boolean | null> = {};
 
-_canvas.addEventListener("keydown", event => {
-    event.preventDefault();
-
+canvasContainer.addEventListener("keydown", event => {
     if (_keys[event.code] !== false) {
         _keys[event.code] = true;
         _keyName = event.code;
     }
 });
 
-_canvas.addEventListener("keyup", event => {
+canvasContainer.addEventListener("keyup", event => {
     _keys[event.code] = null;
 
     switch (event.code) {
@@ -525,7 +491,6 @@ window.addEventListener("blur", () => {
     _keys = {};
 });
 
-
 /**
  * BalderJS
  * 
@@ -538,6 +503,7 @@ const mouse = {
 
     get left(): boolean { return !!_buttons[0]; }, set left(value: false) { _buttons[0] = value; },
     get right(): boolean { return !!_buttons[2]; }, set right(value: false) { _buttons[2] = value; },
+
     /**
      * Returns the state of all buttons.
      */
@@ -549,37 +515,34 @@ let _mouseY = -1;
 let _mouseOver: boolean;
 let _buttons: (boolean | null)[] = []
 
-_canvas.addEventListener("mousedown", event => {
-    event.preventDefault();
-    _canvas.focus();
-
+canvasContainer.addEventListener("mousedown", (event) => {
     if (_buttons[event.button] !== false) {
         _buttons[event.button] = true;
     }
 });
 
-_canvas.addEventListener("mouseup", event => {
+canvasContainer.addEventListener("mouseup", event => {
     _buttons[event.button] = null;
 });
 
-_canvas.addEventListener("mousemove", event => {
-    const rect = _canvas.getBoundingClientRect();
+canvasContainer.addEventListener("mousemove", event => {
+    const rect = canvasContainer.getBoundingClientRect();
 
     _mouseX = event.clientX - rect.left;
     _mouseY = event.clientY - rect.top;
     _mouseOver = true;
 });
 
-_canvas.addEventListener("mouseout", () => {
+canvasContainer.addEventListener("mouseout", () => {
     _mouseOver = false;
     _buttons = [];
 });
 
-_canvas.addEventListener("contextmenu", event => {
+canvasContainer.addEventListener("contextmenu", event => {
     event.preventDefault();
 });
 
-_canvas.addEventListener("wheel", event => {
+canvasContainer.addEventListener("wheel", event => {
     event.preventDefault();
 });
 
@@ -608,10 +571,7 @@ let _touches: {
 let _touchable = true;
 
 function _touchHandler(event: TouchEvent) {
-    event.preventDefault();
-    _canvas.focus();
-
-    const rect = _canvas.getBoundingClientRect();
+    const rect = canvasContainer.getBoundingClientRect();
     _touches = [];
 
     for (let i = 0; i < event.touches.length; i++) {
@@ -625,9 +585,9 @@ function _touchHandler(event: TouchEvent) {
     if (_touches.length == 0) _touchable = true;
 }
 
-_canvas.addEventListener("touchstart", _touchHandler);
-_canvas.addEventListener("touchend", _touchHandler);
-_canvas.addEventListener("touchmove", _touchHandler);
+canvasContainer.addEventListener("touchstart", _touchHandler);
+canvasContainer.addEventListener("touchend", _touchHandler);
+canvasContainer.addEventListener("touchmove", _touchHandler);
 
 /**
  * BalderJS
@@ -637,9 +597,9 @@ class Cell {
     private _color: string | null = null;
     private _image: HTMLImageElement | null = null;
     private _text: string | null = null;
-    private _custom: ((c: Cell) => void) | null = null;
-
     private fontSize: number;
+    private textColor = "black";
+    private _custom: ((c: Cell) => void) | null = null;
 
     /**
      * Additional info about this cell.
@@ -653,7 +613,6 @@ class Cell {
         readonly y: number,
         readonly width: number,
         readonly height: number,
-        private textColor: string,
     ) {
         this.fontSize = Math.min(height, width);
     }
@@ -707,7 +666,7 @@ class Cell {
         clear(this.x, this.y, this.width, this.height);
 
         if (this._color) {
-            rectangle(this.x + 0.5, this.y + 0.5, this.width - 1, this.height - 1, this._color);
+            drawRectangle(this.x + 0.5, this.y + 0.5, this.width - 1, this.height - 1, this._color);
         }
 
         if (this._image) {
@@ -715,16 +674,12 @@ class Cell {
         }
 
         if (this._text) {
-            text(this._text, [this.x + this.width / 2, "center"], [this.y + this.height / 2, "center"], this.fontSize, this.textColor)
+            drawText(this._text, [this.x + this.width / 2, "center"], [this.y + this.height / 2, "center"], this.fontSize, this.textColor)
         }
 
         if (this._custom) {
             this._custom(this);
         }
-    }
-
-    toString() {
-        return JSON.stringify(this)
     }
 }
 
@@ -742,22 +697,24 @@ class Grid {
     constructor(
         readonly rows: number,
         readonly columns: number,
-        readonly x = 0,
-        readonly y = 0,
-        readonly width = W - x,
-        readonly height = H - y,
-        private color = "black"
+        private x = 0,
+        private y = 0,
+        private width = W,
+        private height = H,
+        private color = "black",
+        private lineWidth = 1,
     ) {
-        this.cellWidth = (width - columns - 1) / columns;
-        this.cellHeight = (height - rows - 1) / rows;
+        this.cellWidth = (this.width - (columns + 1) * lineWidth) / columns;
+        this.cellHeight = (this.height - (rows + 1) * lineWidth) / rows;
 
         for (let i = 0; i < rows; i++) {
             this.cells[i] = [];
             for (let j = 0; j < columns; j++) {
                 this.cells[i][j] = new Cell(i, j,
-                    x + j * (this.cellWidth + 1) + 1,
-                    y + i * (this.cellHeight + 1) + 1,
-                    this.cellWidth, this.cellHeight, color
+                    x + j * (this.cellWidth + lineWidth) + lineWidth,
+                    y + i * (this.cellHeight + lineWidth) + lineWidth,
+                    this.cellWidth,
+                    this.cellHeight,
                 );
             }
         }
@@ -769,7 +726,7 @@ class Grid {
     /**
      * Returns cell at given position.
      */
-    cell(row: number, column: number) {
+    getCell(row: number, column: number) {
         return this.cells[row][column];
     }
 
@@ -819,8 +776,8 @@ class Grid {
      * Returns the cell, if any, containing (`x`, `y`).
      */
     cellFromPoint(x: number, y: number): Cell | undefined {
-        const column = Math.floor((x - this.x) / (this.cellWidth + 1));
-        const row = Math.floor((y - this.y) / (this.cellHeight + 1));
+        const column = Math.floor((x - this.x - 2 * this.lineWidth) / (+this.width - 2 * this.lineWidth) * this.columns);
+        const row = Math.floor((y - this.y - 2 * this.lineWidth) / (+this.height - 2 * this.lineWidth) * this.rows);
 
         return this.cells[row]?.[column];
     }
@@ -830,7 +787,7 @@ class Grid {
      */
     draw() {
         if (this.color) {
-            rectangle(this.x, this.y, this.width, this.height, this.color)
+            drawRectangle(this.x, this.y, this.width as number, this.height as number, this.color)
         }
 
         for (let i = 0; i < this.rows; i++) {
@@ -839,17 +796,17 @@ class Grid {
             }
         }
     }
-
-    toString() {
-        return JSON.stringify(this)
-    }
 }
 
 /**
  * BalderJS
  * 
+ * A rectangular hitbox.
  */
 class Hitbox {
+    /**
+     * Additional info about this hitbox.
+     */
     tag: any;
 
     constructor(
@@ -884,62 +841,11 @@ class Hitbox {
         );
     }
 
-    drawOutline(color = "black") {
-        rectangle(this.x, this.y, Math.max(this.width, 0), Math.max(this.height, 0), color, 1);
-    }
-
-    toString() {
-        return JSON.stringify(this)
-    }
-}
-
-/**
- * BalderJS
- * 
- */
-class Button {
-    private hb: Hitbox;
-    private activatable = true;
-
-    tag: any;
-
-    constructor(
-        readonly text: string,
-        x = 0,
-        y = 0,
-        width?: number,
-        height?: number,
-        private color = "lightgrey",
-        private fontSize = 16,
-        private textColor = "black"
-    ) {
-        width = width ?? text.length * fontSize
-        height = height ?? fontSize * 2
-        this.hb = new Hitbox(x, y, width, height)
-        this.draw()
-    }
-
-    get activated(): boolean {
-        if (touchscreen.touched || mouse.buttons.some(value => value)) {
-            if (this.activatable) {
-                this.activatable = false;
-                const x = touchscreen.touched ? touchscreen.x : mouse.x;
-                const y = touchscreen.touched ? touchscreen.y : mouse.y;
-
-                return this.hb.contains(x, y);
-            }
-
-            return false;
-        }
-
-        this.activatable = true;
-        return false;
-    }
-
-
-    draw() {
-        rectangle(this.hb.x, this.hb.y, this.hb.width, this.hb.height, this.color)
-        text(this.text, [this.hb.x + this.hb.width / 2, "center"], [this.hb.y + this.hb.height / 2, "center"], this.fontSize, this.textColor)
+    /**
+     * Draws this hitbox outline.
+     */
+    drawOutline(color = "black", lineWidth = 1) {
+        drawRectangle(this.x, this.y, Math.max(this.width, 0), Math.max(this.height, 0), color, lineWidth);
     }
 }
 
@@ -947,16 +853,31 @@ class Button {
  * BalderJS
  * 
  */
-class Sprite extends Hitbox {
+class Sprite {
     private index = 0;
-    private remainingTime!: number;
     private _frames: number[];
     private frameWidth: number;
     private frameHeight: number;
     private sxs: number[] = [];
     private sys: number[] = [];
+    private _framesPerSecond = 12;
+    private remainingTime = 1000 / this._framesPerSecond;
     private _finished = false;
-    private _framesPerSecond!: number
+    private _hitbox: Hitbox;
+
+    /**
+     * Set hitbox offsets for individual frames.
+     * @example
+     * // Make the hitbox smaller for the first frame 
+     * sprite.hitboxOffsets[0] = [10, 10, -20, -20]
+     * 
+     */
+    hitboxOffsets: [x: number, y: number, width: number, height: number][] = [];
+
+    x = 0;
+    y = 0;
+    width: number;
+    height: number;
 
     /**
      * Set to `false` if sprite shouldn't loop.  
@@ -968,16 +889,15 @@ class Sprite extends Hitbox {
         private rows: number,
         private columns: number,
     ) {
-        super(0, 0, 0, 0);
-
-        this._frames = array(rows * columns, i => i!);
-        this.framesPerSecond = 12
+        this._frames = createArray(rows * columns, i => i);
         this.width = this.frameWidth = this.spritesheet.width / this.columns;
         this.height = this.frameHeight = this.spritesheet.height / this.rows;
+        this._hitbox = new Hitbox(this.x, this.y, this.width, this.height);
 
         for (let i = 0; i < rows * columns; i += 1) {
             this.sxs[i] = this.frameWidth * (i % this.columns);
             this.sys[i] = this.frameHeight * Math.floor(i / this.columns);
+            this.hitboxOffsets[i] = [0, 0, 0, 0];
         }
     }
 
@@ -990,7 +910,7 @@ class Sprite extends Hitbox {
     set framesPerSecond(value: number) {
         this._framesPerSecond = value
 
-        this.remainingTime = 1000 / value;
+        this.remainingTime = Math.min(this.remainingTime, 1000 / value);
     }
 
     get framesPerSecond() {
@@ -1003,6 +923,14 @@ class Sprite extends Hitbox {
 
     get frame() {
         return this._frames[this.index];
+    }
+
+    get hitbox() {
+        this._hitbox.x = this.x + this.hitboxOffsets[this.frame][0]
+        this._hitbox.y = this.y + this.hitboxOffsets[this.frame][1]
+        this._hitbox.width = this.width + this.hitboxOffsets[this.frame][2]
+        this._hitbox.height = this.height + this.hitboxOffsets[this.frame][3]
+        return this._hitbox
     }
 
     update() {
@@ -1026,8 +954,8 @@ class Sprite extends Hitbox {
     }
 
     draw() {
-        const sx = this.sxs[this._frames![this.index]];
-        const sy = this.sys[this._frames![this.index]];
+        const sx = this.sxs[this._frames[this.index]];
+        const sy = this.sys[this._frames[this.index]];
 
         ctx.drawImage(
             this.spritesheet,
@@ -1050,7 +978,9 @@ class Sprite extends Hitbox {
                 0, 0, this.frameWidth, this.frameHeight
             );
 
-            images.push(imageFromDataURL(frameCanvas.toDataURL()));
+            const image = new Image();
+            image.src = frameCanvas.toDataURL();
+            images.push(image);
         }
 
         return images;
@@ -1067,6 +997,7 @@ class Turtle {
     private points: [number, number][] = [];
     private _color = "black";
 
+    penIsDown = true;
     penSize = 1;
 
     /**
@@ -1078,23 +1009,18 @@ class Turtle {
      * Create a turtle.
      * 
      * @example
-     * Creates a turtle in the middle of the canvas, headed east (default settings):
-     * ```
-     * let t = new Turtle()
-     * ```
-     * @example
-     * Creates a turtle at (`100`, `200`), headed north:
-     * ```
-     * let t = new Turtle(100, 200, -90)
-     * ```
-     *  
+     * //Creates a turtle in the middle of the canvas, headed east (default settings):
+     * let t1 = new Turtle()
+     * 
+     * //Creates a turtle at (`100`, `200`), headed north:
+     * let t2 = new Turtle(100, 200, -90)
      */
     constructor(
         private x = W / 2,
         private y = H / 2,
         private heading = 0
     ) {
-        document.body.appendChild(this.container);
+        canvasContainer.appendChild(this.container);
         this.container.appendChild(this.turtle);
         this.container.setAttribute("width", "20");
         this.container.setAttribute("height", "20");
@@ -1111,15 +1037,11 @@ class Turtle {
      * The state of the turtle as a 3-tuple.
      * 
      * @example
-     * Get the position and heading of turtle `t`: 
-     * ```
-     * let [x, y, heading] = t.state
-     * ```
-     * @example
-     * Place turtle `t` at (`100`, `200`) headed south:
-     * ```
+     * //Place turtle `t` at (`100`, `200`) headed south:
      * t.state = [100, 200, 90]
-     * ```
+     * 
+     * // Get the position and heading of turtle `t`: 
+     * let [x, y, heading] = t.state
     */
     get state() {
         return [this.x, this.y, this.heading];
@@ -1144,15 +1066,11 @@ class Turtle {
     }
 
     private move() {
-        const style = getComputedStyle(_canvas);
-        const offsetLeft = _canvas.offsetLeft + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
-        const offsetTop = _canvas.offsetTop + parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop);
-        this.container.style.left = (offsetLeft + this.x - 10) + "px";
-        this.container.style.top = (offsetTop + this.y - 10) + "px";
+        const style = getComputedStyle(canvasContainer);
+        this.container.style.left = (this.x - 10) + "px";
+        this.container.style.top = (this.y - 10) + "px";
 
-        if (this.points.length > 0) {
-            this.points.push([this.x, this.y]);
-        }
+        this.points.push([this.x, this.y]);
     }
 
     private turn() {
@@ -1166,14 +1084,14 @@ class Turtle {
     /**
      * Move this turtle `length` pixels in the direction it is headed. 
     */
-    async forward(length: number, penDown = true) {
+    async forward(length: number) {
         this.container.style.zIndex = _layer.toString();
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
         this.x += Math.cos(radians(this.heading)) * length;
         this.y += Math.sin(radians(this.heading)) * length;
 
-        if (penDown) {
+        if (this.penIsDown) {
             ctx.lineTo(this.x, this.y);
             ctx.strokeStyle = this.color;
             ctx.lineWidth = this.penSize;
@@ -1190,8 +1108,8 @@ class Turtle {
     /**
      * Move this turtle `length` pixels in the direction opposite it is headed. 
      */
-    async backward(length: number, penDown = true) {
-        this.forward(-length, penDown);
+    async backward(length: number) {
+        this.forward(-length);
     }
 
     /**
@@ -1215,23 +1133,61 @@ class Turtle {
         this.container.style.display = "none";
     }
 
-    beginFill() {
+    fill() {
+        ctx.beginPath();
+        ctx.moveTo(...this.points[0]);
+        for (let i = 1; i < this.points.length; i++) {
+            ctx.lineTo(...this.points[i])
+        }
+        ctx.closePath();
+        ctx.fillStyle = this.color;
+        ctx.fill();
+
         this.points = [[this.x, this.y]];
-    }
-
-    endFill() {
-        polygon(this.points, this._color);
-        this.points = [];
-    }
-
-    toString() {
-        return JSON.stringify(this)
     }
 }
 
-addEventListener("resize", () => {
-    if (_canvas.style.display == "") location.reload()
-});
+//
+// Elements
+//
+
+/**
+ * BalderJS
+ * 
+ */
+function createButtonElement(
+    textContent: string,
+    x: number,
+    y: number,
+    color = "black",
+): HTMLButtonElement {
+    let elt = document.createElement("button");
+    elt.textContent = textContent;
+    canvasContainer.append(elt);
+    elt.style.left = `${x}px`
+    elt.style.top = `${y}px`
+    elt.style.color = color;
+    elt.style.borderColor = color;
+    return elt;
+}
+
+/**
+ * BalderJS
+ * 
+ */
+function createInputElement(
+    x: number,
+    y: number,
+    color = "black",
+): HTMLInputElement {
+    let elt = document.createElement("input");
+    canvasContainer.append(elt);
+    elt.style.left = `${x}px`
+    elt.style.top = `${y}px`
+    elt.style.color = color;
+    elt.style.borderColor = color;
+    return elt;
+}
 
 
 //
@@ -1249,16 +1205,14 @@ let deltaTime: number;
  * 
  * The `update`-function is run once for every screen update.
  * @example
- * Draw a circle at random postiton each update
- * ```
  * update = () => {
- *     circle(random(W), random(H), 10)
+ *     // Draw a circle at a random postiton
+ *     drawCircle(randomNumber(10, W - 10), randomNumber(10, H - 10), 10)
  * }
- * ```
  * @example
- * Count the number of updates between two space pressings.
- * ```
- * text("Press space twice.")
+ * // Count the number of updates between two space pressings.
+ * drawText("Press space twice.")
+ * 
  * update = () => {
  *     if (keyboard.space) {
  *         keyboard.space = false
@@ -1267,7 +1221,7 @@ let deltaTime: number;
  *         update = () => {
  *             clear()
  *             n++
- *             text(n)
+ *             drawText(n)
  *
  *             if (keyboard.space) {
  *                 update = null
@@ -1275,7 +1229,6 @@ let deltaTime: number;
  *         }
  *     }
  * }
- * ```
  */
 let update: (() => void) | null = null;
 let _timestamp0: number;
@@ -1285,6 +1238,7 @@ function _updateHandler(timestamp: number) {
     _timestamp0 = timestamp;
 
     update?.();
+
     requestAnimationFrame(_updateHandler);
 }
 
@@ -1299,43 +1253,39 @@ requestAnimationFrame(_updateHandler)
 /**
  * BalderJS
  * 
- * Creates an array filled with `value`.
+ * Create an array filled with values returned by the `callback`-function. 
  * @example
- * Create the array `["-", "-", "-", "-", "-"]`:
- * ```
- * let a = array(5, "-")
- * ``` 
+ * // Create the array `[0, 2, 4, 6, 8, 10]`
+ * let a = createArray(6, i => 2 * i)
  */
-function array<T>(length: number, value: Exclude<T, Function>): T[];
+function createArray<T>(length: number, callback: ((index: number) => T)): T[];
 /**
  * BalderJS
  * 
- * Create an array filled with values returned by the `callback`-function. 
+ * Creates an array filled with `value`.
  * @example
- * Create the array `[0, 2, 4, 6, 8, 10]`:
- * ```
- * let a = array(6, i => 2 * i)
- * ``` 
+ * // Create the array `["-", "-", "-", "-", "-"]`
+ * let a = createArray(5, "-")
  */
-function array<T>(length: number, callback: ((index: number) => T)): T[];
-function array(length: number, value: unknown) {
+function createArray<T>(length: number, value: T): T[];
+function createArray(length: number, value: unknown) {
     return Array.from({ length }, (_, i) =>
         typeof value == "function" ? value(i) : value);
 }
 
+/**
+ * BalderJS
+ * 
+ * Create a 2D-array filled with values returned by the `callback`-function. 
+*/
+function createArray2D<T>(rows: number, columns: number, callback: ((rowIndex: number, columnIndex: number) => T)): T[][];
 /** 
  * BalderJS
  * 
  * Create a 2D-array filled with `value`.
  */
-function array2D<T>(rows: number, columns: number, value: Exclude<T, Function>): T[][];
-/**
- * BalderJS
- * 
- * Create a 2D-array filled with values returned by the `callback`-function. 
- */
-function array2D<T>(rows: number, columns: number, callback: ((rowIndex: number, columnIndex: number) => T)): T[][];
-function array2D(rows: number, columns: number, value: unknown) {
+function createArray2D<T>(rows: number, columns: number, value: T): T[][];
+function createArray2D(rows: number, columns: number, value: unknown) {
     return Array.from({ length: rows }, (_, i) =>
         Array.from({ length: columns }, (_, j) =>
             typeof value == "function" ? value(i, j) : value));
@@ -1349,11 +1299,9 @@ const _audioList: [OscillatorNode, GainNode][] = [];
  * 
  * Plays a beep. A user interaction is mandatory.
  * @example
- * Beeps for two seconds:
- * ```
- * let f = +await read("Frequency (Hz): ")
+ * // Beeps for two seconds:
+ * const f = +await input("Frequency (Hz):")
  * beep(f, 2000)
- * ```
  */
 function beep(frequency = 800, msDuration = 200, volume = 1): Promise<void> {
     if (!_audioContext) _audioContext = new AudioContext();
@@ -1390,9 +1338,7 @@ function beep(frequency = 800, msDuration = 200, volume = 1): Promise<void> {
  * 
  * Returns `radAngle`, an angle in radians, to degrees. 
  * @example
- * ```
- * write(degrees(Math.PI))      // 180   
- * ```   
+ * output(degrees(Math.PI))      // 180   
  */
 function degrees(radAngle: number): number {
     return radAngle * 180 / Math.PI;
@@ -1422,9 +1368,7 @@ function pointFromPolar(radius: number, degAngle: number, x0 = 0, y0 = 0): [x: n
  * 
  * Returns `degAngle`, an angle in degrees, to radians. 
  * @example
- * ```
- * write(radians(180))      // 3.141592653589793 
- * ```   
+ * output(radians(180))      // 3.141592653589793 
  */
 function radians(degAngle: number): number {
     return degAngle * Math.PI / 180;
@@ -1433,22 +1377,11 @@ function radians(degAngle: number): number {
 /**
  * BalderJS
  * 
- */
-function rand(N: number) {
-    return Math.floor(Math.random() * N);
-}
-
-/**
- * BalderJS
- * 
- * Returns a random number between `min` and `max` (both included).
+ * Returns a random number between `min` and `max`, both included.
  * @example
- * Throw a die:
- * ```
- * let die = random(1, 6)
- * ``` 
+ * let die = randomNumber(1, 6)
 */
-function random(min: number, max: number, step = 1) {
+function randomNumber(min: number, max: number, step = 1) {
     return min + Math.floor(Math.random() * Math.floor((max - min) / step + 1)) * step;
 }
 
@@ -1457,13 +1390,11 @@ function random(min: number, max: number, step = 1) {
  * 
  * Returns a random item from `items`, the argument list.
  * @example
- * A random color:
- * ```
+ * // A random color
  * let color = randomItem("red", "green", "blue")
- * ``` 
  */
 function randomItem<T>(...items: T[]): T {
-    return items[rand(items.length)];
+    return items[Math.floor(Math.random() * items.length)];
 }
 
 /**
@@ -1473,7 +1404,7 @@ function randomItem<T>(...items: T[]): T {
  * Values `r`(ed), `g`(reen) and `b`(lue) are integers in the interval 0 to 255.
  * Value `a`(lpha) is between `0` and `1`.
  */
-function rgba(r: number, g: number, b: number, a = 1): string {
+function colorFromRGB(r: number, g: number, b: number, a = 1): string {
     return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
@@ -1484,7 +1415,7 @@ function rgba(r: number, g: number, b: number, a = 1): string {
  */
 function shuffle(array: unknown[]) {
     for (let i = array.length - 1; i > 0; i--) {
-        const j = rand(i + 1);
+        const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
@@ -1494,12 +1425,12 @@ function shuffle(array: unknown[]) {
  * 
  * Pauses execution for `msDuration` ms.
  * @example
- * Show a green screen after 3 seconds:
- * ```
  * fill("red")
+ * 
+ * // Wait 3 seconds
  * await sleep(3000)
+ * 
  * fill("green")
- * ``` 
  */
 function sleep(msDuration: number): Promise<void> {
     return new Promise<void>(resolve => setTimeout(() => resolve(), msDuration));
@@ -1509,15 +1440,15 @@ function sleep(msDuration: number): Promise<void> {
  * BalderJS
  * 
  */
-class Vector {
+class Vector2 {
     constructor(
         public x: number,
         public y: number
     ) {
     }
 
-    static fromPolar(length: number, angle: number): Vector {
-        return new Vector(Math.cos(angle) * length, Math.sin(angle) * length);
+    static fromPolar(length: number, angle: number): Vector2 {
+        return new Vector2(Math.cos(angle) * length, Math.sin(angle) * length);
     }
 
     get length(): number {
@@ -1540,8 +1471,8 @@ class Vector {
         this.y = length * Math.sin(value);
     }
 
-    clone(): Vector {
-        return new Vector(this.x, this.y);
+    clone(): Vector2 {
+        return new Vector2(this.x, this.y);
     }
 
     normalize() {
@@ -1550,45 +1481,45 @@ class Vector {
         this.y = Math.sin(angle);
     }
 
-    toNormalized(): Vector {
+    toNormalized(): Vector2 {
         const angle = this.angle;
-        return new Vector(Math.cos(angle), Math.sin(angle));
+        return new Vector2(Math.cos(angle), Math.sin(angle));
     }
 
-    add(v: Vector) {
+    add(v: Vector2) {
         this.x += v.x;
         this.y += v.y;
     }
 
-    adding(v: Vector): Vector {
-        return new Vector(this.x + v.x, this.y + v.y);
+    toAdded(v: Vector2): Vector2 {
+        return new Vector2(this.x + v.x, this.y + v.y);
     }
 
-    subtract(v: Vector) {
+    subtract(v: Vector2) {
         this.x -= v.x;
         this.y -= v.y;
     }
 
-    subtracting(v: Vector): Vector {
-        return new Vector(this.x - v.x, this.y - v.y);
+    toSubtracted(v: Vector2): Vector2 {
+        return new Vector2(this.x - v.x, this.y - v.y);
     }
 
-    multiply(v: Vector) {
+    multiply(v: Vector2) {
         this.x *= v.x;
         this.y *= v.y;
     }
 
-    multiplying(v: Vector): Vector {
-        return new Vector(this.x * v.x, this.y * v.y);
+    toMultiplied(v: Vector2): Vector2 {
+        return new Vector2(this.x * v.x, this.y * v.y);
     }
 
-    divide(v: Vector) {
+    divide(v: Vector2) {
         this.x /= v.x;
         this.y /= v.y;
     }
 
-    dividing(v: Vector): Vector {
-        return new Vector(this.x / v.x, this.y / v.y);
+    toDivided(v: Vector2): Vector2 {
+        return new Vector2(this.x / v.x, this.y / v.y);
     }
 
     scale(s: number) {
@@ -1596,20 +1527,20 @@ class Vector {
         this.y *= s;
     }
 
-    toScaled(s: number): Vector {
-        return new Vector(this.x * s, this.y * s);
+    toScaled(s: number): Vector2 {
+        return new Vector2(this.x * s, this.y * s);
     }
 
-    distanceTo(v: Vector): number {
+    distanceTo(v: Vector2): number {
         return Math.hypot(this.x - v.x, this.y - v.y);
     }
 
-    directionTo(v: Vector): Vector {
+    directionTo(v: Vector2): Vector2 {
         const angle = Math.atan2(v.y - this.y, v.x - this.x);
-        return new Vector(Math.cos(angle), Math.sin(angle));
+        return new Vector2(Math.cos(angle), Math.sin(angle));
     }
 
-    dot(v: Vector): number {
+    dot(v: Vector2): number {
         return this.x * v.x + this.y * v.y;
     }
 
@@ -1621,11 +1552,11 @@ class Vector {
 /**
  * BalderJS
  * 
-*/
+ */
 function setLayer(layer: number) {
     if (!_ctxs[layer]) {
         let canvasLayer = document.createElement("canvas");
-        _canvas.append(canvasLayer);
+        canvasContainer.append(canvasLayer);
         canvasLayer.width = W;
         canvasLayer.height = H;
         canvasLayer.style.zIndex = layer.toString();
@@ -1638,9 +1569,7 @@ function setLayer(layer: number) {
 }
 
 setLayer(0);
-_canvas.style.display = "";
-_canvas.tabIndex = 0;
-_canvas.focus();
+canvasContainer.focus();
 
 
 //
@@ -1648,14 +1577,60 @@ _canvas.focus();
 //
 
 const _params = new URL(location.href).searchParams;
+
+const _iElt = document.createElement("textarea");
+const _oElt = document.createElement("textarea");
+let _setterElt: HTMLTextAreaElement;
+
+const _setParam = _params.get("set");
+
+if (_setParam == "i" || _setParam == "o") {
+    const setter = document.createElement("div");
+    setter.className = "setter";
+    ioContainer.append(setter)
+    ioContainer.append(document.createElement("hr"));
+
+    const setterLabel = document.createElement("label")
+    setterLabel.textContent = _setParam + "=";
+
+    _setterElt = _setParam == "i" ? _iElt : _oElt;
+    _setterElt.rows = 4;
+    setterLabel.append(_setterElt);
+
+    _setterElt.onkeydown = (event) => {
+        if (event.ctrlKey && event.code == "Enter") setterButton.click()
+    }
+
+    const setterButton = document.createElement("button")
+    setterButton.textContent = "\u25b6";
+    setterButton.onclick = () => {
+        if (_setParam == "i") {
+            _params.set("i", encodeURIComponent(_iElt.value.trimEnd()));
+        } else {
+            _params.set("o", encodeURIComponent(_oElt.value.trimEnd()));
+            _params.delete("set");
+        }
+
+        window.location.search = _params.toString()
+    }
+
+    setter.append(setterLabel, setterButton);
+}
+
 const _iParam = _params.get("i");               // input
 let _inputLines: string[] = [];
 let _inputLineIndex = 0;
-let _outputElt: HTMLDivElement | null;
 
 if (_iParam != null) {
     _inputLines = decodeURIComponent(_iParam).split("\n");
 }
+
+
+/**
+ * BalderJS
+ * 
+*/
+function input(): string;
 
 /**
  * BalderJS
@@ -1663,49 +1638,47 @@ if (_iParam != null) {
  * Writes `prompt`, and waits for user input.
  * @example
  * ```
- * let name = await read("Your name? ")
+ * let name = await input("Your name? ")
  * ```
- */
-function read(prompt = ""): Promise<string> {
-    const inputElt = document.createElement("div");
-    inputElt.textContent = prompt;
-    _io.append(inputElt);
-    inputElt.className = "input";
+*/
+function input(prompt: string): Promise<string>;
 
-    _canvas.hidden = true;
-    _io.hidden = false;
-    _outputElt = null;
+function input(prompt?: string): string | Promise<string> {
+    const inputElt = document.createElement("div");
+    inputElt.textContent = "\u200B" + (prompt ?? "");    // ZWSP
+    inputElt.className = "input";
+    ioContainer.append(inputElt);
+    _output = null;
+
+    const valueElt = document.createElement("b");
+    inputElt.append(valueElt);
+
+    canvasContainer.hidden = true;  // 15.0
+    ioContainer.hidden = false;     // 15.0
+
+    if (prompt == null) {
+        valueElt.textContent = _inputLines[_inputLineIndex++] ?? ""
+        _iElt.value += valueElt.textContent! + "\n";
+        return valueElt.textContent;
+    }
 
     return new Promise<string>((resolve) => {
         if (_inputLines[_inputLineIndex] != null) {
-            let b = document.createElement("b");
-            b.textContent = _inputLines[_inputLineIndex];
-            inputElt.append(b);
-
-            _canvas.hidden = false;
-            _io.hidden = true;
-            _canvas.focus()
-
-            resolve(_inputLines[_inputLineIndex++]);
+            valueElt.textContent = _inputLines[_inputLineIndex++];
+            _iElt.value += valueElt.textContent! + "\n";
+            resolve(valueElt.textContent);
         } else {
-            const valueElt = document.createElement("b");
-            inputElt.append(valueElt);
             valueElt.contentEditable = "true"
             valueElt.focus();
 
             inputElt.onclick = () => valueElt.focus();
 
-            valueElt.onkeydown = event => {
-                if (event.code == "Enter") {
+            valueElt.onkeydown = (event) => {
+                if (event.code == "Enter" || event.code == "NumpadEnter") {
                     event.preventDefault();
                     valueElt.contentEditable = "false";
-                    _inputLines[_inputLineIndex] = valueElt.textContent!;
-
-                    _canvas.hidden = false;
-                    _io.hidden = true;
-                    _canvas.focus()
-
-                    resolve(_inputLines[_inputLineIndex++]);
+                    _iElt.value += valueElt.textContent! + "\n";
+                    resolve(valueElt.textContent!);
                 }
             }
         }
@@ -1713,131 +1686,139 @@ function read(prompt = ""): Promise<string> {
     });
 }
 
+
 /**
  * BalderJS
- * 
- * Writes `value`. Hides the canvas.
- * 
- * @example
- * ```
- * write("On row 1.")  
- * write("On row 2.")
- * ```  
- * @example
- * ```
- * write("On row 1.", " ")  
- * write("Also on row 1.")
- * ```  
- * @example
- * ```
- * write()  // Line break  
- * ```  
  */
-function write(value?: unknown, end: "" | " " | "\t" | "\n" = "\n") {
-    if (!_outputElt) {
-        _outputElt = document.createElement("div");
-        _io.append(_outputElt);
-        _outputElt.className = "output";
+const TAB = Symbol("\t")
 
-        _canvas.hidden = true;
-        _io.hidden = false;
+/**
+ * BalderJS
+ */
+const EMPTY_STRING = Symbol("")
+
+/**
+ * BalderJS
+ */
+const SPACE = Symbol(" ")
+
+/**
+ * BalderJS
+ */
+const NEWLINE = Symbol("\n")
+
+
+let _output: HTMLDivElement | null;
+
+/**
+ * BalderJS
+ */
+function output(..._: [...values: unknown[], terminator: Symbol]): void;
+function output(...values: unknown[]): void;
+function output(...args: unknown[]) {
+    if (!_output) {
+        _output = document.createElement("div");
+        _output.className = "output";
+        ioContainer.append(_output);
     }
 
-    _outputElt.textContent! += arguments.length > 0 ? str(value) + end : "\n";
+    const lastArg = args.at(-1)
+
+    if (typeof lastArg == "symbol") {
+        _output.textContent! += args.slice(0, -1).map(str).join(" ") + lastArg.description;
+    } else {
+        _output.textContent! += args.map(str).join(" ") + "\n";
+    }
+
+    _oElt.textContent = _output.textContent;
+
+    canvasContainer.hidden = true;  // 15.0
+    ioContainer.hidden = false;     // 15.0
+}
+
+logContainer.className = str(_params.get("log"));
+
+const log = console.log;
+console.log = (...args: unknown[]) => {
+    log(...args);
+    if (_params.get("log") == "o") {
+        output(...args.map(str));
+    } else {
+        logContainer.textContent += args.map(str).join(" ") + "\n";
+    }
+}
+
+logContainer.onclick = (event) => {
+    if (logContainer.clientWidth - event.offsetX < 18 && event.offsetY < 16) {
+        clearLog()
+    }
+}
+
+function clearLog() {
+    logContainer.textContent = "";
 }
 
 /**
  * BalderJS
  * 
- * Clears the input/output-element.
  */
 function clearIO() {
-    _io.hidden = false;
-    _io.innerHTML = "";
-    _outputElt = null;
+    ioContainer.replaceChildren();
+    _output = null;
 
-    _canvas.hidden = true;
+    canvasContainer.hidden = true;  // 15.0
+    ioContainer.hidden = false;     // 15.0
 }
-
 
 window.addEventListener("load", () => {
     const oParam = _params.get("o");        // output
     if (oParam != null) {
-        _canvas.hidden = true;
-        _io.hidden = false;
+        ioContainer.append(document.createElement("hr"));
 
-        _io.append(document.createElement("hr"));
         const respElt = document.createElement("p")
-        _io.append(respElt);
+        ioContainer.append(respElt);
 
-        const output = _outputElt?.textContent!.split("\n").map(line => line.trimEnd()).join("\n").trimEnd() ?? "";
+        const outputValue = _output?.textContent!.split("\n").map(line => line.trimEnd()).join("\n").trimEnd() ?? "";
         const oValue = decodeURIComponent(oParam);
 
-        if (output == oValue) {
-            respElt.innerHTML = `<span class="correct">${output}</span>`;
+        if (outputValue == oValue) {
+            respElt.innerHTML = `<span class="correct">${outputValue}</span>`;
         } else {
             let offset = 0;
-            while (output[offset] == oValue[offset]) {
+            while (outputValue[offset] == oValue[offset]) {
                 offset++
             }
 
-            const correct = output.slice(0, offset);
+            const correct = outputValue.slice(0, offset);
             respElt.innerHTML = `<span class="correct">${correct}</span>`;
 
-            const incorrect = output.slice(offset) + " ".repeat(Math.max(0, oValue.length - output.length));
+            ioContainer.append(document.createElement("hr"));
+
+            const incorrect = outputValue.slice(offset) + " ".repeat(Math.max(0, oValue.length - outputValue.length));
             respElt.innerHTML += `<span class="incorrect">${incorrect}</span>`;
 
             const correctElt = document.createElement("p")
-            _io.append(correctElt);
-            correctElt.innerHTML += `<span class="correct">${oParam}</span>`;
+            ioContainer.append(correctElt);
+            correctElt.innerHTML = `<span class="correct">${oValue}</span>`;
         }
     }
 });
 
 
 //
-// Console
+// Error handling
 //
 
-let _repetition = 1;
-let _repetitionElt: HTMLSpanElement;
-let _lastValue = ["", ""];
-
 window.onerror = (_event, _source, _lineno, _colno, error) => {
-    _writeConsole("error", str(error))
-}
-
-const _log = console.log;
-console.log = (...args: any[]) => {
-    _log(...args);
-
-    _writeConsole("log", args.map(arg => str(arg)).join(" "));
-}
-
-function _writeConsole(...value: string[]) {
-    if (value[0] == _lastValue[0] && value[1] == _lastValue[1]) {
-        _repetitionElt.textContent = " *" + ++_repetition;
+    if (_params.get("log") == "o") {
+        output(error)
     } else {
         const elt = document.createElement("div")
-        _console.append(elt)
-        elt.textContent = value[1]
-        elt.className = value[0];
-        elt.scrollIntoView()
-
-        _repetitionElt = document.createElement("span")
-        elt.append(_repetitionElt)
-        _repetition = 1;
-        _lastValue = value;
+        elt.textContent = str(error)
+        elt.className = "error";
+        logContainer.append(elt)
+        elt.scrollIntoView()        // ?
     }
-}
-
-function clearConsole() {
-    _console.innerHTML = "";
-    _lastValue = ["", ""];
-}
-
-_console.onclick = () => {
-    clearConsole();
 }
 
 window.addEventListener("unhandledrejection", event => {
