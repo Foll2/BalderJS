@@ -1,6 +1,6 @@
 /**
  * BalderJS
- * version 15.0 (2026-08-17)
+ * version 15.0.0 (2026-08-17)
  * Mattias Steinwall
  * Baldergymnasiet, Skellefteå, Sweden
 */
@@ -1653,8 +1653,8 @@ function input(prompt?: string): string | Promise<string> {
     const valueElt = document.createElement("b");
     inputElt.append(valueElt);
 
-    canvasContainer.hidden = true;  // 15.0
-    ioContainer.hidden = false;     // 15.0
+    canvasContainer.hidden = true;  // 15.0.0
+    ioContainer.hidden = false;     // 15.0.0
 
     if (prompt == null) {
         valueElt.textContent = _inputLines[_inputLineIndex++] ?? ""
@@ -1732,8 +1732,8 @@ function output(...args: unknown[]) {
 
     _oElt.textContent = _output.textContent;
 
-    canvasContainer.hidden = true;  // 15.0
-    ioContainer.hidden = false;     // 15.0
+    canvasContainer.hidden = true;  // 15.0.0
+    ioContainer.hidden = false;     // 15.0.0
 }
 
 logContainer.className = str(_params.get("log"));
@@ -1766,8 +1766,8 @@ function clearIO() {
     ioContainer.replaceChildren();
     _output = null;
 
-    canvasContainer.hidden = true;  // 15.0
-    ioContainer.hidden = false;     // 15.0
+    canvasContainer.hidden = true;  // 15.0.0
+    ioContainer.hidden = false;     // 15.0.0
 }
 
 window.addEventListener("load", () => {
